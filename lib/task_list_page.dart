@@ -87,19 +87,21 @@ class _TaskListPageState extends State<TaskListPage> {
                 ),
               ),
               const SizedBox(height: 10),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: taskController.filteredTaskList.isNotEmpty
-                      ? taskController.filteredTaskList.length
-                      : 0,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: ListElement(
-                        index: index,
-                      ),
-                    );
-                  },
+              Obx(
+                () => Expanded(
+                  child: ListView.builder(
+                    itemCount: taskController.taskList.isNotEmpty
+                        ? taskController.taskList.length
+                        : 0,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        child: ListElement(
+                          task:taskController.taskList[index], taskController: taskController,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ],

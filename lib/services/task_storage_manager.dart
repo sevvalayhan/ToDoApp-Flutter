@@ -9,7 +9,8 @@ class TaskStorageManager {
   }
 
   List<Task> getTaskList() {
-    List<Task> taskList = taskStorage.read(StorageKey.taskList.name);
+    var taskList = taskStorage.read(StorageKey.taskList.name);
+
     return taskList ?? <Task>[];
   }
 

@@ -16,38 +16,47 @@ class AddTask extends StatefulWidget {
 
 class _AddTaskState extends State<AddTask> {
   final _formGlobalKey = GlobalKey<FormState>();
-  final taskController = Get.find<TaskController>();
+  final taskController = Get.put(TaskController());
+
+  String taskName = '';
+  String taskDescription = '';
+  bool isCompleted = false;
+  Priority? priority = Priority.low;
+  DateTime? date;
 
   void _submitTask() {
     if (_formGlobalKey.currentState!.validate()) {
       _formGlobalKey.currentState!.save();
       Task newTask = Task(
           id: DateTime.now().microsecondsSinceEpoch,
-          taskName: taskController.task.value.taskName,
-          taskDescription: taskController.task.value.taskDescription,
-          isCompleted: false,
-          priority: taskController.task.value.priority,
-          date: taskController.task.value.date);
+          taskName: taskName,
+          taskDescription: taskDescription,
+          isCompleted: isCompleted,
+          priority: priority!,
+          date: date!);
 
       taskController.addTask(newTask);
       Get.back(result: newTask);
     }
   }
 
+  Future<void> selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2025),
+    );
+
+    if (picked != null) {
+      setState(() {
+        date = picked;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Future<void> selectDate(BuildContext context) async {
-      final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2020),
-        lastDate: DateTime(2025),
-      );
-      if (picked != null && picked != taskController.task.value.date) {
-        taskController.task.value.date = picked;
-      }
-    }
-
     return Scaffold(
         appBar: AppBar(
           backgroundColor: myLila,
@@ -91,10 +100,7 @@ class _AddTaskState extends State<AddTask> {
                               }
                             },
                             onChanged: (value) {
-                              taskController.task.update((task)
-                              {
-                                task?.taskName = value;
-                              });
+                              taskName = value;
                             },
                           ),
                           const SizedBox(height: 20),
@@ -113,57 +119,53 @@ class _AddTaskState extends State<AddTask> {
                               }
                             },
                             onChanged: (value) {
-                              taskController.task.update((task)
-                              {
-                                task?.taskDescription=value;
+                              taskDescription = value;
+                            },
+                          ),
+                          DropdownButtonFormField<Priority>(
+                            value: priority,
+                            decoration: InputDecoration(
+                              label: const Text("Priority"),
+                              enabledBorder: const OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.grey, width: 2),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: priority!.color, width: 2),
+                              ),
+                            ),
+                            items: Priority.values.map((p) {
+                              return DropdownMenuItem(
+                                value: p,
+                                child: Text(p.title),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                priority = value;
                               });
                             },
                           ),
-                          Obx(
-                            ()=> DropdownButtonFormField<Priority>(
-                              value: taskController.task.value.priority,
-                              decoration: InputDecoration(
-                                label: const Text("Priority"),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: taskController.task.value.priority.color, width: 2),
+                          Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(date == null
+                                    ? 'Tarih seçilmedi'
+                                    : ' ${DateFormat.yMMMMd('tr_TR').format(date!)}'),
+                                const SizedBox(
+                                  height: 20,
+                                  width: 20,
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: taskController.task.value.priority.color, width: 2),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    selectDate(context);
+                                  },
+                                  child: const Text('Tarih Seç'),
                                 ),
-                              ),
-                              items: Priority.values.map((p) {
-                                return DropdownMenuItem(
-                                  value: p,
-                                  child: Text(p.title),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                taskController.task.value.priority = value!;
-                              },
-                            ),
-                          ),
-                          Obx(
-                            ()=> Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  // ignore: unnecessary_null_comparison
-                                  Text(taskController.task.value.date == null
-                                      ? 'Tarih seçilmedi'
-                                      : ' ${DateFormat.yMMMMd('tr_TR').format(taskController.task.value.date)}'),
-                                  const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () => selectDate(context),
-                                    child: const Text('Tarih Seç'),
-                                  ),
-                                ],
-                              ),
+                              ],
                             ),
                           ),
                         ],

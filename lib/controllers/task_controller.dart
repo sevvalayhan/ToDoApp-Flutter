@@ -1,20 +1,12 @@
 import 'package:get/get.dart';
 import 'package:todo_app_comp/models/task.dart';
-import 'package:todo_app_comp/priority.dart';
 import 'package:todo_app_comp/services/task_storage_manager.dart';
 
 class TaskController extends GetxController {
   TaskStorageManager taskStorageManager = TaskStorageManager();
   var taskList = <Task>[].obs;
   var filteredTaskList = <Task>[].obs;
-  var task = Task(
-    id: DateTime.now().microsecondsSinceEpoch,
-    taskName: '',
-    taskDescription: '',
-    isCompleted: false,
-    priority: Priority.low,
-    date: DateTime.now().add(const Duration(days: 1)),
-  ).obs;
+
 
   @override
   void onInit() {
@@ -37,10 +29,7 @@ class TaskController extends GetxController {
   }
 
   void fetchTaskList() {
-    var tasks = taskStorageManager.getTaskList();
-    print("Task list before assignment: ${taskList}");
-    taskList.value = tasks.isNotEmpty ? tasks : <Task>[];
-    print("Task list after assignment: ${taskList}");
+    taskList = taskStorageManager.getTaskList().obs;
   }
 
   void saveTaskList() {
