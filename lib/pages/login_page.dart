@@ -65,8 +65,7 @@ class _LoginPageState extends State<LoginPage> {
                   
                   padding: EdgeInsets.zero,
                   onPressed: _changeVisibility,
-                  // style: IconButton.styleFrom(padding: EdgeInsets.zero),
-                  icon: Icon(
+                   icon: Icon(
                     isHidden ? Icons.visibility : Icons.visibility_off,
                     color: Colors.pink,
                   ),

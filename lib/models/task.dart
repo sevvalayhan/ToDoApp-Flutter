@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:todo_app_comp/priority.dart';
 
 class Task {
@@ -20,20 +21,20 @@ class Task {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'taskName': taskName,
-      'taskDescription': taskDescription,
-      'isCompleted': isCompleted,
+      'title': taskName,
+      'description': taskDescription,
+      'is_complated': isCompleted,
       'priority': priority.toJson(),
-      'date': date.toIso8601String(),
+      'date': DateFormat('yyyy-MM-dd').format(date).toString()
     };
   }
 
   Task.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    taskName = json['taskName'];
-    taskDescription = json['taskDescription'];
-    isCompleted = json['isCompleted'];
-    priority = Priority.fromJson(json['priority']);
+    taskName = json['title'];
+    taskDescription = json['description'];
+    isCompleted = json['is_complated'];
+    priority = Priority.fromJson(json['priority']);;
     date = DateTime.parse(json['date']);
   }
 }

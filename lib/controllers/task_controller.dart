@@ -1,49 +1,66 @@
 import 'package:get/get.dart';
 import 'package:todo_app_comp/models/task.dart';
-import 'package:todo_app_comp/services/task_storage_manager.dart';
+import 'package:todo_app_comp/services/task_services.dart';
 
 class TaskController extends GetxController {
-  TaskStorageManager taskStorageManager = TaskStorageManager();
-  var taskList = <Task>[].obs;
+  var tasks = <Task>[].obs;
   var filteredTaskList = <Task>[].obs;
+  var isLoading = true.obs;
+  final TaskServices _taskService = TaskServices();
 
-
-  @override
-  void onInit() {
-    super.onInit();
+  Future<void> getTasks() async {
+    try {
+      isLoading(true);
+      var fetchedTasks = await _taskService.fetchTasks();
+      tasks.value = fetchedTasks;
+      filteredTaskList.value = tasks;
+    } finally {
+      isLoading(false);
+    }
   }
 
-  void addTask(Task newTask) {
-    taskList.add(newTask);
-    saveTaskList();
+  Future<bool> addTask(Task task) async {
+    bool success = false;
+    try {
+      isLoading(true);
+      success = await _taskService.addTask(task);
+      print(success);
+    } finally {
+      isLoading(false);
+      return success;
+    }
   }
 
-  void deleteTask(Task deletedTask) {
-    taskList.remove(deletedTask);
-    saveTaskList();
+  Future<bool> updateTask(int id, Task task) async {
+    bool success = false;
+    try {
+      isLoading(true);
+      success = await _taskService.updateTask(id, task);
+      return success;
+    } finally {
+      isLoading(false);
+      return success;
+    }
   }
 
-  void updateTask(int index, Task newTask) {
-    taskList[index] = newTask;
-    saveTaskList();
+  Future<bool> deleteTask(int id) async {
+    bool success = false;
+    try {
+      isLoading(true);
+      success = await _taskService.deleteTodo(id);
+      return success;
+    } finally {
+      isLoading(false);
+      return success;
+    }
   }
 
-  void fetchTaskList() {
-    taskList = taskStorageManager.getTaskList().obs;
-  }
-
-  void saveTaskList() {
-    taskStorageManager.saveTaskList(taskList);
-  }
-
-  void removeTaskList(int index) {
-    taskStorageManager.removeTaskList(index);
-  }
-
-  void changeCheckBox(int index) {
-    // int taskIndex = taskController.taskList
-    //     .indexOf(taskController.filteredTaskList[index]);
-    taskList[index].isCompleted = !taskList[index].isCompleted;
-    saveTaskList();
+  Future<void> changeCheckBox(int id) async {
+    Task newTask = tasks.firstWhere((task) => task.id == id);
+    newTask.isCompleted = !newTask.isCompleted;
+    print(newTask.toJson());
+    await updateTask(id, newTask);
+    getTasks();
+    print("check box");
   }
 }

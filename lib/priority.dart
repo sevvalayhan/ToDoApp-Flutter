@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 
 enum Priority {
-  urgent(color: Colors.red, title: "Urgent"),
-  high(color: Colors.orange, title: "High"),
-  medium(color: Colors.yellow, title: "Medium"),
-  low(color: Colors.pink, title: "Low");
+  urgent(color: Color.fromARGB(255, 218, 16, 16), title: "Acil"),
+  high(color: Color.fromRGBO(207, 0, 248, 0.69), title: "Yüksek"),
+  medium(color: Color.fromARGB(167, 47, 218, 67), title: "Orta"),
+  low(color: Color.fromARGB(255, 217, 72, 120), title: "Düşük");
 
   const Priority({required this.color, required this.title});
   final Color color;
   final String title;
-  String toJson() => title;
+  String toJson() =>name.toString();
   static Priority fromJson(String json) {
     switch (json) {
-      case "Urgent":
+      case "urgent":
         return Priority.urgent;
-      case "High":
+      case "high":
         return Priority.high;
-      case "Medium":
+      case "medium":
         return Priority.medium;
-      case "Low":
+      case "low":
         return Priority.low;
       default:
         throw ArgumentError("Unknown priority: $json");

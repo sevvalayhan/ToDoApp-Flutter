@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:todo_app_comp/constants/colors.dart';
 import 'package:todo_app_comp/controllers/task_controller.dart';
 import 'package:todo_app_comp/models/task.dart';
 
+// ignore: must_be_immutable
 class ListElement extends StatelessWidget {
-  const ListElement(
-      {super.key, required this.task, required this.taskController});
+  ListElement(
+      {super.key,
+      required this.task,
+      required this.taskController,
+      required this.index,
+      required this.isDetailsVisible});
 
   final Task task;
+  final int index;
   final TaskController taskController;
+  bool isDetailsVisible;
 
   @override
   Widget build(BuildContext context) {
+    var date = DateFormat('yMMMMd', 'tr_TR').format(task.date);
     return Padding(
       padding: const EdgeInsets.all(5),
       child: Slidable(
@@ -24,7 +33,7 @@ class ListElement extends StatelessWidget {
             SlidableAction(
               onPressed: (context) {
                 Get.defaultDialog(
-                    title: "Are you sure you want to delete this task?",
+                    title: "Silmek istediğinize emin misiniz?",
                     titlePadding: const EdgeInsets.all(20),
                     cancel: Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -38,11 +47,14 @@ class ListElement extends StatelessWidget {
                     confirm: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: TextButton(
-                          onPressed: () {
-                            taskController.deleteTask(task);
+                        onPressed: () async {
+                          if (await taskController.deleteTask(task.id)) {
                             Get.back();
-                          },
-                          child: const Text("Delete")),
+                            taskController.getTasks();
+                          }
+                        },
+                        child: const Text("Delete"),
+                      ),
                     ));
               },
               backgroundColor: Colors.white,
@@ -67,12 +79,15 @@ class ListElement extends StatelessWidget {
           ),
           child: ListTile(
             onTap: () async {
-              // await Get.to(UpdateTask(task: taskController.task.value))
-              //     ?.then((task) {
-              //   if (task != null) {
-              //     taskController.task = task;
-              //   }
-              // });
+              // showDialog(
+              //     context: context,
+              //     builder: (BuildContext context) {
+              //       return TaskDetailCard(
+              //         titleText: task.taskName,
+              //         detailText: task.taskDescription,
+              //         date: date.toString(),
+              //       );
+              //     });
             },
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
@@ -83,8 +98,9 @@ class ListElement extends StatelessWidget {
             ),
             leading: Checkbox(
               value: task.isCompleted,
-              onChanged: (bool? value) {
-                // taskController.changeCheckBox(widget.index);
+              onChanged: (bool? value) async {
+                await taskController.changeCheckBox(
+                    task.id); //burası düzeldi sanki, bir çalıştırayım mı
               },
               checkColor: myBlack,
               activeColor: Colors.white,
@@ -99,35 +115,32 @@ class ListElement extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Obx(
-                        () => Text(
-                          task.taskName,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            decoration: task.isCompleted
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                      Text(
+                        task.taskName,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          decoration:
+                              taskController.filteredTaskList[index].isCompleted
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                       const SizedBox(height: 5),
-                      Obx(
-                        () => Text(
-                          task.taskDescription,
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16,
-                            decoration: task.isCompleted
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
+                      Text(
+                        task.taskDescription,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 16,
+                          decoration: task.isCompleted
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                       ),
                     ],
                   ),
@@ -138,7 +151,7 @@ class ListElement extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      task.date.toString(),
+                      date.toString(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
@@ -146,14 +159,11 @@ class ListElement extends StatelessWidget {
                     ),
                     IconButton(
                       onPressed: () async {
-                        // await Get.to(UpdateTask(task: task))?.then((_task) {
-                        //   if (_task != null) {
-                        //     task = _task;
-                        //     taskController.updateTask(widget.index, task);
-                        //   }
-                        // });
+                        await Get.toNamed("/updateTask",
+                            arguments: {"taskId": task.id});
+                        print("TASK ID: " + task.id.toString());
                       },
-                      icon: const Icon(Icons.settings, color: Colors.white70),
+                      icon: const Icon(Icons.settings, color: Colors.white),
                     ),
                   ],
                 ),
